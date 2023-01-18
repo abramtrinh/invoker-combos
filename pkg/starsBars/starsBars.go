@@ -2,7 +2,6 @@ package starsBars
 
 import (
 	"errors"
-	"fmt"
 )
 
 //custom type errors with Error() method or errors.new("") or fmt.Errorf()
@@ -12,12 +11,13 @@ import (
 //hmm best practices for writing unit tests like table driven.
 //i could use abstractions here or interface but i will 100% forget
 // reason for returning bool, error is for table driven uunit testing (ami doing it right)
+// changed errors from fmt.Errorf("") with values of abc so I
 
 // Checks for a, b, c to be distinct values.
 func distinct(a, b, c int) (bool, error) {
 	if a == b || a == c || b == c {
 		//return errors.New("values are not distinct")
-		return false, fmt.Errorf("%d, %d, %d are not distinct", a, b, c)
+		return false, errors.New("values are not distinct")
 	}
 	return true, nil
 }
@@ -26,7 +26,7 @@ func distinct(a, b, c int) (bool, error) {
 func positive(a, b, c int) (bool, error) {
 	if a <= 0 || b <= 0 || c <= 0 {
 		//return errors.New("at least one value is not positive")
-		return false, fmt.Errorf("%d, %d, %d are not non-zero positive", a, b, c)
+		return false, errors.New("values are not non-zero positive")
 	}
 	return true, nil
 }
@@ -56,11 +56,11 @@ func repeatedSum(a, b, c int) (bool, error) {
 	// maybe use error wrapping here. fmt.Errorf()
 	switch {
 	case 2*b == (a + c):
-		return false, errors.New("the 1 1 test failed")
+		return false, errors.New("does not pass the 1,1 test")
 	case 3*b == (2*a + c):
-		return false, errors.New("the 1 2 test failed")
+		return false, errors.New("does not pass the 1,2 test")
 	case 3*b == (2*c + a):
-		return false, errors.New("the 2 1 test failed")
+		return false, errors.New("does not pass the 2,1 test")
 	}
 	return true, nil
 }
