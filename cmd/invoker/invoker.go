@@ -1,8 +1,10 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"math/rand"
+	"os"
 	"strings"
 	"time"
 
@@ -47,6 +49,8 @@ func main() {
 
 	var spellMap map[int]string = createSpellMap()
 
+	scanner := bufio.NewScanner(os.Stdin)
+
 	//Closure to keep track of stats
 	counter := statTracker()
 
@@ -54,8 +58,12 @@ func main() {
 	for {
 		randSpell := getRandomSpell()
 		fmt.Printf("Type in %v\n", randSpell.spellName)
-		var scanString string
-		fmt.Scanln(&scanString)
+
+		scanner.Scan()
+		scanString := scanner.Text()
+		if err := scanner.Err(); err != nil {
+			fmt.Printf("ERROR: reading standard input: %v", err)
+		}
 
 		if scanString == "quit" {
 			break

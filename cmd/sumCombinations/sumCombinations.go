@@ -63,22 +63,35 @@ func main() {
 	switch len(flag.Args()) {
 	case 0:
 		fmt.Println("Please input 3 positive and distinct numbers seperated by spaces.")
-		//Initialized values to -1 to catch inputs that are non-ints because -1 won't change if so.
-		//>3 values inputted is a non-issue due to fmt.Scan looping
-		a, b, c := -1, -1, -1
-		fmt.Scan(&a, &b, &c)
-		if (a == -1) || (b == -1) || (c == -1) {
-			fmt.Printf("%d %d %d invalid input was entered.\n", a, b, c)
-			os.Exit(1)
+		scanner := bufio.NewScanner(os.Stdin)
+		scanner.Scan()
+		text := scanner.Text()
+		if err := scanner.Err(); err != nil {
+			fmt.Printf("ERROR: reading standard input: %v", err)
 		}
-		_, err := starsBars.MathCheck(a, b, c)
-		checkErrorExit(err, a, b, c)
-		fmt.Printf("%d %d %d passes the starBars tests.\n", a, b, c)
+		words := strings.Fields(text)
+		intArray, err := strSlice2IntArray(words)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		_, err = starsBars.MathCheck(intArray[0], intArray[1], intArray[2])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		fmt.Printf("%d %d %d passes the starBars tests.\n", intArray[0], intArray[1], intArray[2])
 	case 3:
 		intArray, err := strSlice2IntArray(flag.Args())
-		checkErrorExit(err, flag.Arg(0), flag.Arg(1), flag.Arg(2))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		_, err = starsBars.MathCheck(intArray[0], intArray[1], intArray[2])
-		checkErrorExit(err, intArray[0], intArray[1], intArray[2])
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
 		fmt.Printf("%d %d %d passes the starBars tests.\n", intArray[0], intArray[1], intArray[2])
 	default:
 		fmt.Println("Please rerun this with either 3 numbers or none.")
@@ -103,12 +116,4 @@ func strSlice2IntArray(strSlice []string) ([3]int, error) {
 		intArray[i] = intValue
 	}
 	return intArray, nil
-}
-
-// Streamlines/cleans up error checks for some parts.
-func checkErrorExit(err error, a, b, c any) {
-	if err != nil {
-		fmt.Printf("%v %v %v failed: %v\n", a, b, c, err)
-		os.Exit(1)
-	}
 }
