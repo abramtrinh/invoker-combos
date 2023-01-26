@@ -39,6 +39,7 @@ var spellArray = [10]spell{
 }
 
 var modeFlag = flag.String("m", "", "modes: timeAttack/speedTest")
+var startTime time.Time
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
@@ -59,6 +60,11 @@ func main() {
 	//Closure to keep track of stats
 	counter := statTracker()
 
+	/*
+		NOTE: Modes are kind of janky. Will need to fix or check if they have issues.
+		Could also use channel implementation for time or counter. Sounds racy.
+		Drain the channel or something. Using global variables feels bad.
+	*/
 	switch *modeFlag {
 	case "timeAttack":
 		fmt.Println("You have 30 seconds to get as many spells correct as possible.")
@@ -70,6 +76,7 @@ func main() {
 		}()
 	case "speedTest":
 		fmt.Println("Get 10 spells correctly in the fastest time possible.")
+		startTime = time.Now()
 	}
 
 	//Could make below into a single function.
@@ -179,8 +186,8 @@ func statTracker() func(action int) {
 				maxCombo = currCombo
 			}
 			if *modeFlag == "speedTest" && numCorrect == 10 {
-				fmt.Println("10 correct answers achieved.")
-				fmt.Printf("Combos: %d/%d (Current/Max) | Accuracy: %.4v%%\n", currCombo, maxCombo, numCorrect/numTries*100)
+				fmt.Printf("10 correct answers achieved in %v.\n", time.Since(startTime))
+				fmt.Printf("Combos: %d/%d (Current/Max) | Accuracy: %.4v%% | Correct: %v\n", currCombo, maxCombo, numCorrect/numTries*100, numCorrect)
 				os.Exit(0)
 			}
 		//Wrong answer, reset combo counter and +1 tries
@@ -190,7 +197,7 @@ func statTracker() func(action int) {
 		//Prints stats out.
 		case 3:
 			//Should I check for divide by 0 error?
-			fmt.Printf("Combos: %d/%d (Current/Max) | Accuracy: %.4v%%\n", currCombo, maxCombo, numCorrect/numTries*100)
+			fmt.Printf("Combos: %d/%d (Current/Max) | Accuracy: %.4v%% | Correct: %v\n", currCombo, maxCombo, numCorrect/numTries*100, numCorrect)
 		}
 	}
 
