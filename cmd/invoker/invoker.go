@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"math/rand"
 	"os"
@@ -37,11 +38,15 @@ var spellArray = [10]spell{
 	{spellValue: quas + wex + exort, spellName: "Deafening Blast"},
 }
 
+var modeFlag = flag.String("m", "", "modes: timeAttack/speedTest")
+
 func init() {
 	rand.Seed(time.Now().UnixNano())
 }
 
 func main() {
+	flag.Parse()
+
 	if err := checkConsts(); err != nil {
 		fmt.Println(err)
 		return
@@ -53,6 +58,19 @@ func main() {
 
 	//Closure to keep track of stats
 	counter := statTracker()
+
+	switch *modeFlag {
+	case "timeAttack":
+		fmt.Println("You have 30 seconds to get as many spells correct as possible.")
+		go func() {
+			time.Sleep(time.Second * 30)
+			fmt.Println("30 seconds have passed.")
+			counter(3)
+			os.Exit(0)
+		}()
+	case "speedTest":
+		fmt.Println("Get 10 spells correctly in the fastest time possible.")
+	}
 
 	//Could make below into a single function.
 	for {
@@ -159,6 +177,11 @@ func statTracker() func(action int) {
 			//Keep track of highest combo count
 			if maxCombo < currCombo {
 				maxCombo = currCombo
+			}
+			if *modeFlag == "speedTest" && numCorrect == 10 {
+				fmt.Println("10 correct answers achieved.")
+				fmt.Printf("Combos: %d/%d (Current/Max) | Accuracy: %.4v%%\n", currCombo, maxCombo, numCorrect/numTries*100)
+				os.Exit(0)
 			}
 		//Wrong answer, reset combo counter and +1 tries
 		case 2:
